@@ -8,7 +8,7 @@
   "homepage": "https://sannekarlsson.github.io/memory-game",
   "license": "MIT",
   "scripts": {
-    "build": "parcel build index.html",
+    "build": "parcel build index.html --public-url .",
     "clear": "rm -rf dist",
     "deploy": "gh-pages -d dist",
     "lint": "eslint js/*.js || exit 0",
