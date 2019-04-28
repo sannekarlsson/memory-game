@@ -9,10 +9,16 @@ const memoryGrid = document.getElementById('memory-grid')
 const gameCompleted = document.getElementById('game-completed')
 const result = document.getElementById('card-flips')
 
+// Class for flipping a card
 const SELECTED = 'selected'
+// Store the current 1–2 flipped cards
 let selectedCards = []
+// Keep count to decide when game is completed
 let matchedCards = 0
+// Result to user
 let cardFlips = 0
+// Prevent display of the game completed if user clicks on the new game button
+let displayTimeout
 
 const memoryCards = []
 // Initialize memoryCards array of 16 (8*2) card elements with icons
@@ -46,19 +52,6 @@ const flipCard = card => {
     matchSelectedCards()
 }
 
-// Memory game click listener for cards
-memoryGame.addEventListener('click', event => {
-    flipCard(event.target.parentElement)
-})
-
-// Memory game key listener for cards
-// https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML
-memoryGame.addEventListener('keydown', event => {
-    if (event.keyCode === 13) {
-        flipCard(event.target)
-    }
-})
-
 // Check if the selected cards match
 const matchSelectedCards = () => {
     if (selectedCards.length < 2) {
@@ -90,21 +83,19 @@ const displayGameCompleted = () => {
     memoryGame.style.overflow = 'hidden'
     result.innerText = `${cardFlips} card flips`
     memoryGrid.classList.add('blur')
-    gameCompleted.style.opacity = 1
-    gameCompleted.style.visibility = 'visible'
+    gameCompleted.setAttribute('style', 'opacity: 1; visibility: visible')
 }
 
 const hideGameCompleted = () => {
-    gameCompleted.style.opacity = 0
-    gameCompleted.style.visibility = 'hidden'
+    gameCompleted.removeAttribute('style')
     memoryGrid.classList.remove('blur')
     memoryGame.style.overflow = 'visible'
 }
 
 const displayCongrats = () => {
-    setTimeout(() => {
+    displayTimeout = setTimeout(() => {
         displayGameCompleted()
-        setTimeout(hideGameCompleted, 6000)
+        setTimeout(hideGameCompleted, 4000)
     }, 500)
 }
 
@@ -123,9 +114,23 @@ const resetGame = () => {
     hideGameCompleted()
 }
 
+// Memory game click listener for cards
+memoryGame.addEventListener('click', event => {
+    flipCard(event.target.parentElement)
+})
+
+// Memory game key listener for cards
+// https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML
+memoryGame.addEventListener('keydown', event => {
+    if (event.keyCode === 13) {
+        flipCard(event.target)
+    }
+})
+
 // New game button -- reset game and start a new
 const newGameButton = document.getElementById('new-game')
 newGameButton.addEventListener('click', () => {
+    clearTimeout(displayTimeout)
     resetGame()
     randomizeCardsAndSetMemoryGame()
 })

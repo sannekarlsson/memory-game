@@ -90,17 +90,14 @@ svg {
     display: grid;
     font-size: 1rem;
     font-weight: 400;
-    height: 102%;
+    height: 100%;
     justify-content: center;
-    left: -1%;
     opacity: 0;
     position: absolute;
     text-align: center;
-    top: -1%;
     transition: all 0.7s;
     visibility: hidden;
-    width: 102%;
-    z-index: 100;
+    width: 100%;
 }
 
 .blur {
