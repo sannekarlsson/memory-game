@@ -4,10 +4,11 @@ import card from './card'
 import ICONS from './iconConstants'
 import icon from './icon'
 
-const memoryGame = document.getElementById('memory-game')
-const memoryGrid = document.getElementById('memory-grid')
-const gameCompleted = document.getElementById('game-completed')
-const result = document.getElementById('card-flips')
+const memoryGame = document.querySelector('.memory-game')
+const memoryGrid = document.querySelector('.memory-grid')
+const newGameButton = document.querySelector('.new-game')
+const gameCompleted = document.querySelector('.game-completed')
+const result = document.querySelector('.card-flips')
 
 // Class for flipping a card
 const SELECTED = 'selected'
@@ -114,12 +115,12 @@ const resetGame = () => {
     hideGameCompleted()
 }
 
-// Memory game click listener for cards
+// Memory game click listener to flip cards
 memoryGame.addEventListener('click', event => {
     flipCard(event.target.parentElement)
 })
 
-// Memory game key listener for cards
+// Memory game key listener to flip cards
 // https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML
 memoryGame.addEventListener('keydown', event => {
     if (event.keyCode === 13) {
@@ -127,12 +128,20 @@ memoryGame.addEventListener('keydown', event => {
     }
 })
 
-// New game button -- reset game and start a new
-const newGameButton = document.getElementById('new-game')
+// New game button to reset game and start a new
 newGameButton.addEventListener('click', () => {
     clearTimeout(displayTimeout)
     resetGame()
     randomizeCardsAndSetMemoryGame()
+})
+
+// Touch effect to New game button
+newGameButton.addEventListener('touchstart', () => {
+    newGameButton.classList.add('touch')
+})
+
+newGameButton.addEventListener('touchend', () => {
+    newGameButton.classList.remove('touch')
 })
 
 // Randomize card order & set up memory game

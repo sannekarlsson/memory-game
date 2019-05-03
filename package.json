@@ -2,7 +2,6 @@
   "name": "memory-game",
   "version": "1.0.0",
   "description": "Memory game",
-  "main": "main.js",
   "private": true,
   "author": "Sanne Karlsson",
   "homepage": "https://sannekarlsson.github.io/memory-game",
