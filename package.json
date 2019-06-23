@@ -7,15 +7,15 @@
   "homepage": "https://sannekarlsson.github.io/memory-game",
   "license": "MIT",
   "scripts": {
-    "build": "parcel build index.html --public-url .",
+    "build": "parcel build index.pug --public-url .",
     "clear": "rm -rf dist",
     "deploy": "gh-pages -d dist",
     "lint": "eslint js/*.js || exit 0",
-    "prebuild": "npm run prerun",
+    "prebuild": "npm run prerun -s",
     "predeploy": "npm run build",
     "prerun": "npm run lint && npm run clear",
-    "prestart": "npm run prerun",
-    "start": "parcel index.html"
+    "prestart": "npm run prerun -s",
+    "start": "parcel index.pug"
   },
   "devDependencies": {
     "autoprefixer": "^9.5.1",
@@ -24,13 +24,21 @@
     "babel-plugin-transform-es2015-spread": "^6.22.0",
     "cssnano": "^4.1.10",
     "eslint": "^5.16.0",
-    "gh-pages": "^2.0.1"
+    "gh-pages": "^2.0.1",
+    "pug": "^2.0.4"
   },
   "babel": {
     "plugins": [
       "transform-es2015-spread"
     ]
   },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "iOS > 10"
+  ],
   "eslintConfig": {
     "parser": "babel-eslint"
   },

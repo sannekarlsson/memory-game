@@ -27,6 +27,7 @@ button {
     appearance: none;
     border: none;
     cursor: pointer;
+    margin: 0;
     padding: 0;
 }
 
@@ -53,7 +54,9 @@ main {
 .card-face {
     backface-visibility: hidden;
     height: 100%;
+    left: 0;
     position: absolute;
+    top: 0;
     width: 100%;
 }
 

@@ -1,29 +1,36 @@
-// Create a card element
-const card = (face, icon) => {
-    const card = document.createElement('div')
-    card.className = 'card'
-    // For matching flipped cards
-    card.dataset.cardFace = face
-    // For accessibility
-    card.tabIndex = 0
-    card.title = 'memory-card'
-    card.append(cardBack(), cardFace(face, icon))
-    return card
+function Card(element) {
+    this.element = element;
 }
 
-// Create back side of card
-const cardBack = () => {
-    const back = document.createElement('div')
-    back.className = 'card-back'
-    return back
+Card.prototype.addClass = function (...classes) {
+
+    this.element.classList.add(...classes);
+
+    this.dispatchCardEvent()
 }
 
-// Create face of card
-const cardFace = (face, icon) => {
-    const cardFace = document.createElement('div')
-    cardFace.className = `card-face ${face}`
-    cardFace.innerHTML = icon
-    return cardFace
+Card.prototype.removeClass = function (...classes) {
+
+    this.element.classList.remove(...classes);
+
+    this.dispatchCardEvent()
 }
 
-export default card
+/**
+ * Dispatch an event to indicate the card element
+ * has been altered.
+ */
+Card.prototype.dispatchCardEvent = function () {
+
+    const cardEvent = new CustomEvent('cardstate', {
+        bubbles: true,
+        detail: {
+            cardClass: this.element.className,
+            index: this.element.dataset.index,
+        }
+    })
+
+    this.element.dispatchEvent(cardEvent);
+}
+
+export default Card
