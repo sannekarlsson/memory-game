@@ -18,13 +18,13 @@
     "start": "parcel index.pug"
   },
   "devDependencies": {
-    "autoprefixer": "^9.5.1",
+    "autoprefixer": "^9.7.1",
     "babel-core": "^6.26.3",
-    "babel-eslint": "^10.0.1",
+    "babel-eslint": "^10.0.3",
     "babel-plugin-transform-es2015-spread": "^6.22.0",
     "cssnano": "^4.1.10",
     "eslint": "^5.16.0",
-    "gh-pages": "^2.0.1",
+    "gh-pages": "^2.1.1",
     "pug": "^2.0.4"
   },
   "babel": {
