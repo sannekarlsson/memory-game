@@ -6,6 +6,8 @@
     const MATCH = 'js-match';
     // Class for currently flipped card(s)
     const FLIP = 'js-flip';
+    // Aria label for cards facing down
+    const FACE_DOWN = 'face down';
     // Class for completed game
     const GAME_COMPLETE = 'js-game-complete';
     // Key to local storage
@@ -42,6 +44,12 @@
 
             cardElem.className = data.cards[cardKey];
 
+            if (cardElem.classList.contains(FLIP) ||
+                cardElem.classList.contains(MATCH)) {
+                // Update aria label to symbol
+                cardElem.setAttribute('aria-label', cardElem.dataset.symbol);
+            }
+
             memoryGrid.appendChild(cardElem);
         }
     };
@@ -71,23 +79,29 @@
         data.flips += 1;
 
         cardElem.classList.add(FLIP);
+
+        // Update aria label to symbol
+        cardElem.setAttribute('aria-label', cardElem.dataset.symbol);
     };
 
-    // Remove the flipped status when the card has been matched.
-    // Flips over the card back to face down when it was not a pair.
+    // Card to face down after a mismatch or starting a new game.
     const deselectCard = function (cardElem) {
         cardElem.classList.remove(FLIP);
+
+        // Update aria label to face down
+        cardElem.setAttribute('aria-label', FACE_DOWN);
     };
 
     // Matched a pair of cards
     const matchedCard = function (cardElem) {
-        deselectCard(cardElem);
+        cardElem.classList.remove(FLIP);
         cardElem.classList.add(MATCH);
     };
 
     // Reset card to initial game state (face down)
     const resetCard = function (cardElem) {
-        cardElem.classList.remove(MATCH, FLIP);
+        deselectCard(cardElem);
+        cardElem.classList.remove(MATCH);
     };
 
     // Update cards data status and save session 
