@@ -1,50 +1,59 @@
 {
   "name": "memory-game",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Memory game",
   "private": true,
   "author": "Sanne Karlsson",
-  "homepage": "https://sannekarlsson.github.io/memory-game",
   "license": "MIT",
+  "homepage": "https://sannekarlsson.github.io/memory-game",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sannekarlsson/memory-game"
+  },
   "scripts": {
-    "build": "parcel build index.pug --public-url .",
-    "clear": "rm -rf dist",
+    "build": "run-p html js scss assets",
+    "prebuild": "rm -rf dist/* && mkdir dist/js",
+    "assets": "cp -R assets/ dist/assets",
+    "html": "posthtml index.html -o dist",
+    "js": "terser js/main.js -o dist/js/main.js",
+    "scss": "sass scss/main.scss -s compressed | postcss -o dist/css/main.css",
     "deploy": "gh-pages -d dist",
-    "lint": "eslint js/*.js || exit 0",
-    "prebuild": "npm run prerun -s",
     "predeploy": "npm run build",
-    "prerun": "npm run lint && npm run clear",
-    "prestart": "npm run prerun -s",
-    "start": "parcel index.pug"
+    "dev": "run-p watch-* serve",
+    "predev": "npm run build",
+    "serve": "browser-sync dist -w -b 'google chrome'",
+    "watch-assets": "onchange 'assets' -- npm run assets",
+    "watch-html": "onchange '*.html' -- npm run html",
+    "watch-js": "onchange 'js/*.js' -- npm run js",
+    "watch-scss": "onchange 'scss/*.scss' -- npm run scss"
   },
   "devDependencies": {
-    "autoprefixer": "^9.8.5",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^10.1.0",
-    "babel-plugin-transform-es2015-spread": "^6.22.0",
-    "cssnano": "^4.1.10",
-    "eslint": "^5.16.0",
+    "autoprefixer": "^10.3.7",
+    "browser-sync": "^2.27.5",
     "gh-pages": "^2.2.0",
-    "pug": "^3.0.1"
-  },
-  "babel": {
-    "plugins": [
-      "transform-es2015-spread"
-    ]
+    "htmlnano": "^1.1.1",
+    "npm-run-all": "^4.1.5",
+    "onchange": "^7.1.0",
+    "postcss": "^8.3.9",
+    "postcss-cli": "^9.0.1",
+    "posthtml-cli": "^0.10.0",
+    "sass": "^1.42.1",
+    "terser": "^5.9.0"
   },
   "browserslist": [
-    "> 0.5%",
-    "last 2 versions",
-    "Firefox ESR",
-    "not dead",
-    "iOS > 10"
+    "> 0.25%",
+    "not dead"
   ],
-  "eslintConfig": {
-    "parser": "babel-eslint"
-  },
   "postcss": {
     "plugins": {
       "autoprefixer": true
+    }
+  },
+  "posthtml": {
+    "plugins": {
+      "htmlnano": {
+        "minifySvg": false
+      }
     }
   }
 }

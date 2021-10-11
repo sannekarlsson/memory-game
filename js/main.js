@@ -1,383 +1,280 @@
-'use strict'
-
-import Card from './Card'
-import cardElement from './cardElement'
-import ICONS from './iconConstants'
-import icon from './icon'
-
-
-const STATE = {
-    // Result to user
-    cardFlips: 0,
-    // Classes and card faces to generate cards from a previous session
-    cardProperties: [],
-    // Displayed congrats to user after game completion
-    isCongratulated: false,
-    // Keep count to decide when game is completed (8)
-    matchedPairs: 0,
-}
-
-
-// Class for flipping a card 
-const SELECTED = 'selected'
-// Class for currently flipped card(s)
-const CURRENT = 'current'
-
-// Prevent display of the game completed if user clicks on the new game button
-let displayTimeout
-
-
-/**********************************
- * DOM elements
- **********************************/
-const memoryGame = document.querySelector('.memory-game')
-const memoryGrid = memoryGame.querySelector('.memory-grid')
-const gameCompleted = memoryGame.querySelector('.game-completed')
-const result = gameCompleted.querySelector('.card-flips')
-const newGameButton = document.querySelector('.new-game')
-// Use .getElementsByClassName since need a live collection
-const currentCardSelection = memoryGrid.getElementsByClassName(CURRENT)
-
-
-/**********************************
- * Custom events 
- **********************************/
-
-// Custom state update event to store the new state 
-const stateUpdateEvent = new CustomEvent('stateupdate', { bubbles: true })
-
-// Custom game completion event 
-const gameCompletedEvent = new CustomEvent('gamecompleted', { bubbles: true })
-
-
-/**********************************
- * Initialize memory cards 
- **********************************/
-let memoryCards = []
-
-// Initialize memoryCards array of 16 (8*2) card elements with icons
-const initializeMemoryCards = () => {
-
-    for (let name in ICONS) {
-        const cardIcon = icon(ICONS[name])
-        const face = name.toLowerCase()
-
-        memoryCards.push(new Card(cardElement(face, cardIcon)))
-        memoryCards.push(new Card(cardElement(face, cardIcon)))
-    }
-}
-
-// Initialize memoryCards array from previous session
-const initializeMemoryCardsFromState = () => {
-
-    memoryCards = STATE.cardProperties.map(({ cardClass, cardFace }) => {
-        const cardIcon = ICONS[cardFace.toUpperCase()]
-        const cardElem = cardElement(cardFace, icon(cardIcon), cardClass)
-        return new Card(cardElem)
-    })
-}
-
-/**********************************
- * DOM and state updates 
- **********************************/
-
-const addCardElementsToTheDOM = cardElements => {
-    // Add card elements to the DOM
-    memoryGrid.append(...cardElements)
-
-    // Updates to DOM/state
-    memoryGrid.dispatchEvent(stateUpdateEvent)
-}
-
-const flipCard = card => {
-
-    // Card already flipped or two other cards are
-    if (card.className.includes(SELECTED) ||
-        currentCardSelection.length === 2) {
-        return;
-    }
-
-    // Add to result message
-    STATE.cardFlips++
-
-    // Add classes to flip card and perform matching
-    memoryCards[card.dataset.index].addClass(SELECTED, CURRENT)
-
-    matchSelectedCards()
-}
-
-const resetCards = (cardCollection, ...classes) => {
-
-    [].slice.call(cardCollection).forEach(card => {
-
-        memoryCards[card.dataset.index].removeClass(...classes)
-
-    })
-}
-
-// Update matched pairs
-const updateMatchedPairs = () => {
-
-    if (++STATE.matchedPairs === 8) {
-        // All cards flipped -- game completed
-        memoryGame.dispatchEvent(gameCompletedEvent)
-
-    } else {
-        // Reset currently selected cards
-        resetCards(currentCardSelection, CURRENT)
-    }
-}
-
-
-/**********************************
- * Card matching 
- **********************************/
-
-const isMatchingPair = () => {
-    const [card1, card2] = [].slice.call(currentCardSelection)
-    return card1.dataset.cardFace === card2.dataset.cardFace
-}
-
-// Check if the selected cards match
-const matchSelectedCards = () => {
-
-    // Only match when there are two cards
-    if (currentCardSelection.length < 2) {
-        return
-    }
-
-    if (isMatchingPair()) {
-        updateMatchedPairs()
-    } else {
-        setTimeout(() => {
-            resetCards(currentCardSelection, SELECTED, CURRENT)
-        }, 1000)
-    }
-}
-
-
-/********************************************
- * Game completed message
- ********************************************/
-const displayGameCompleted = () => {
-    memoryGame.style.overflow = 'hidden'
-    result.innerText = `${STATE.cardFlips} card flips`
-    memoryGrid.classList.add('blur')
-    gameCompleted.setAttribute('style', 'opacity: 1; visibility: visible')
-}
-
-const hideGameCompleted = () => {
-    gameCompleted.removeAttribute('style')
-    memoryGrid.classList.remove('blur')
-    memoryGame.style.overflow = 'visible'
-}
-
-const displayCongrats = () => {
-
-    // Congrats already displayed in previous session
-    if (STATE.isCongratulated) return;
-
-    displayTimeout = setTimeout(() => {
-        displayGameCompleted()
-
-        setTimeout(hideGameCompleted, 4000)
-    }, 500)
-
-}
-
-
-/********************************************
- * Game setups
- ********************************************/
-
-/**
-* Initialize game from scratch
-*/
-const initializeGame = () => {
-
-    // Initialize array of cards
-    initializeMemoryCards()
-
-    // Randomize order of cards and initialize game field
-    randomizeCardsAndSetMemoryField()
-}
-
-/**
- * Initialize game from stored state
- */
-const initializeGameFromState = () => {
-
-    // Initialize array of card elements from state
-    initializeMemoryCardsFromState()
-
-    // Initialize current game field
-    setMemoryField()
-
-    // Perform match check
-    matchSelectedCards()
-}
-
-
-// Randomize card order
-const randomizeCards = () => {
-    memoryCards.sort((a, b) => 0.5 - Math.random())
-}
-
-// Set memory field
-const setMemoryField = () => {
-
-    // The index is used for accessing the card object  
-    // in the memoryCards array.
-    const cardElements = memoryCards.map((card, index) => {
-        card.element.dataset.index = index;
-
-        return card.element;
-    })
-
-    // Add card elements to the DOM
-    addCardElementsToTheDOM(cardElements)
-}
-
-const randomizeCardsAndSetMemoryField = () => {
-    randomizeCards()
-    setMemoryField()
-}
-
-// Reset game to start a new
-const resetGame = () => {
-    STATE.matchedPairs = 0
-    STATE.cardFlips = 0
-    STATE.isCongratulated = false
-    resetCards(memoryGrid.children, SELECTED, CURRENT)
-    hideGameCompleted()
-}
-
-// New game
-const newGame = () => {
-    clearTimeout(displayTimeout)
-    resetGame()
-    randomizeCardsAndSetMemoryField()
-}
-
-
-/********************************************
- * State storage handling
- ********************************************/
-
-/**
- * Store classes and card faces of the cards
- * since they determine the state of the game  
- */
-const setCardProperties = () => {
-    // Update card properties
-    STATE.cardProperties = memoryCards.map(card => {
-        return {
-            cardClass: card.element.className,
-            cardFace: card.element.dataset.cardFace,
+(function () {
+
+    'use strict'
+
+    // Class for matched cards 
+    const MATCH = 'js-match';
+    // Class for currently flipped card(s)
+    const FLIP = 'js-flip';
+    // Class for completed game
+    const GAME_COMPLETE = 'js-game-complete';
+    // Key to local storage
+    const STORAGE_KEY = 'mgdata';
+    // Data keeps track of card statuses and flip count
+    const data = {};
+
+    // Prevent display of the game completed if user clicks on the new game button
+    let displayTimeout;
+
+    // DOM elements
+    const memoryGame = document.querySelector('#memory-game');
+    const memoryGrid = memoryGame.querySelector('#memory-grid');
+    const result = memoryGame.querySelector('#card-flips');
+
+
+    // Initialize data from a previous session or with initial game values
+    const initData = function (state) {
+        Object.assign(
+            data,
+            state || {
+                // Card data stored as (key) data-card-id: (value) classes, from the card element
+                cards: {},
+                // Keep count of card flips
+                flips: 0,
+            });
+    };
+
+    // Initialize game from a previous session
+    const initCardsFromData = function () {
+        for (const cardKey in data.cards) {
+
+            const cardElem = memoryGrid.querySelector('[data-card-id=' + cardKey + ']');
+
+            cardElem.className = data.cards[cardKey];
+
+            memoryGrid.appendChild(cardElem);
         }
-    })
-}
+    };
 
-/**
- * Store the updated state, 
- * so the game can be continued in new sessions
- */
-const storeState = event => {
+    // Initialize a new game
+    const initCardShuffle = function () {
+        // Shuffle cards, then reset their states and move them in the shuffled order. 
+        [...memoryGrid.querySelectorAll('.card')]
 
-    // Cards added to the field, update their state
-    if (event.target.matches('.memory-grid')) {
-        setCardProperties()
-    }
+            .sort(function () {
+                return 0.5 - Math.random();
+            })
+            .forEach(function (elem) {
 
-    localStorage.setItem('state', JSON.stringify(STATE))
-}
+                resetCard(elem);
 
-
-/********************************************
- * Event listeners
- ********************************************/
-
-/**
- * Click events
- */
-document.documentElement.addEventListener('click', event => {
-
-    // New game button click
-    if (event.target.matches('.new-game')) {
-        event.preventDefault()
-
-        newGame()
-    }
+                memoryGrid.appendChild(elem);
+            });
+    };
 
 
-    // Card click
-    if (event.target.closest('.card')) {
-        event.preventDefault()
+    // Card manipulation
 
-        flipCard(event.target.closest('.card'))
-    }
-})
+    // Flip over the card face up
+    const flipCard = function (cardElem) {
+        // Count flip
+        data.flips += 1;
 
-/**
- * Custom card state event
- */
-document.addEventListener('cardstate', event => {
+        cardElem.classList.add(FLIP);
+    };
 
-    const previousCardProps = STATE.cardProperties[event.detail.index]
+    // Remove the flipped status when the card has been matched.
+    // Flips over the card back to face down when it was not a pair.
+    const deselectCard = function (cardElem) {
+        cardElem.classList.remove(FLIP);
+    };
 
-    // Update card classes 
-    Object.assign(previousCardProps, { cardClass: event.detail.cardClass })
+    // Matched a pair of cards
+    const matchedCard = function (cardElem) {
+        deselectCard(cardElem);
+        cardElem.classList.add(MATCH);
+    };
 
-    // Updates to DOM/state
-    event.target.dispatchEvent(stateUpdateEvent)
-})
+    // Reset card to initial game state (face down)
+    const resetCard = function (cardElem) {
+        cardElem.classList.remove(MATCH, FLIP);
+    };
 
-/**
- * Custom game completed event
- */
-document.addEventListener('gamecompleted', event => {
-    displayCongrats()
-    STATE.isCongratulated = true
-
-    // Updates to DOM/state
-    event.target.dispatchEvent(stateUpdateEvent)
-})
-
-/**
- * Custom state update event to store the new state
- */
-document.addEventListener('stateupdate', storeState)
+    // Update cards data status and save session 
+    const updateCardData = function (cardElem) {
+        data.cards[cardElem.dataset.cardId] = cardElem.className;
+        storeState();
+    };
 
 
-/**
- * Touch effect to New game button
- */
-newGameButton.addEventListener('touchstart', () => {
-    newGameButton.classList.add('touch')
-})
+    // Card matching
 
-newGameButton.addEventListener('touchend', () => {
-    newGameButton.classList.remove('touch')
-})
+    // Update the paired matching cards
+    const matchingCards = function (cardElems) {
+        cardElems.forEach(function (cardElem) {
+            matchedCard(cardElem);
+        });
+    };
+
+    // Deselect the two nonmatching cards
+    const nonmatchingCards = function (cardElems) {
+        // Some delay for ux
+        setTimeout(function () {
+            cardElems.forEach(function (cardElem) {
+
+                deselectCard(cardElem);
+            });
+        }, 1000);
+    };
+
+    // Check if game is completed
+    const isLastMatchingPair = function () {
+        return memoryGrid.querySelectorAll('.' + MATCH).length === 16;
+    };
+
+    // Match the two flipped over cards
+    const matchCards = function (cardElems) {
+
+        if (cardElems[0].dataset.symbol === cardElems[1].dataset.symbol) {
+            // Cards match 
+            matchingCards(cardElems);
 
 
-/********************************************
- * Start game from scratch or from state
- ********************************************/
-const start = () => {
+            // Check if game is completed
+            if (isLastMatchingPair()) {
+                displayCongrats();
+            }
 
-    const storedState = localStorage.getItem('state')
+        } else {
+            // Cards do not match
+            nonmatchingCards(cardElems);
+        }
+    };
 
-    if (storedState) {
 
-        // Update game state 
-        Object.assign(STATE, JSON.parse(storedState))
+    // Game completed 
 
-        initializeGameFromState()
+    // Show game completed message
+    const displayGameCompleted = function () {
+        memoryGame.classList.add(GAME_COMPLETE);
 
-    } else {
-        initializeGame()
-    }
-}
+        result.textContent = `${data.flips} card flips`;
 
-start()
+        memoryGrid.classList.add('blur');
+    };
+
+    // Hide game completed message
+    const hideGameCompleted = function () {
+        memoryGrid.classList.remove('blur');
+
+        memoryGame.classList.remove(GAME_COMPLETE);
+    };
+
+    // Handle game completed message
+    const displayCongrats = function () {
+
+        // Delay to see all cards flipped before congrats.
+        displayTimeout = setTimeout(function () {
+            displayGameCompleted();
+
+            // Keep congrats message in view to read and then see cards again.
+            setTimeout(hideGameCompleted, 4000);
+        }, 500);
+
+    };
+
+
+    // Event handlers
+
+    // Set up a new game
+    const newGame = function () {
+        // If congrats message have not been cleared
+        clearTimeout(displayTimeout);
+        hideGameCompleted();
+
+        // Reset data to initial state
+        initData();
+
+        // Shuffle and reset cards to a new game
+        initCardShuffle();
+    };
+
+    // Handle card click
+    const cardClick = function (cardElem) {
+
+        // Card is already flipped -- exit
+        if (cardElem.classList.contains(FLIP) || cardElem.classList.contains(MATCH)) {
+            return;
+        }
+
+        // Get flipped cards
+        const flippedCards = memoryGrid.querySelectorAll('.' + FLIP);
+
+        // Two cards are already selected and under process -- exit
+        if (flippedCards.length === 2) {
+            return;
+        }
+
+        // Card can be flipped
+        flipCard(cardElem);
+
+        // Another card is also flipped, check if they match
+        if (flippedCards.length > 0) {
+            matchCards([cardElem, flippedCards[0]]);
+        }
+    };
+
+
+    // State storage handling
+
+    // Store the current state, 
+    // so the game can be continued in a new session
+    const storeState = function () {
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    };
+
+    // Observe card changes to update current data state
+    const observer = new MutationObserver(function (mutations) {
+        for (const mutation of mutations) {
+
+            if (mutation.type === 'attributes' && mutation.target.dataset.cardId) {
+                // Cards have been flipped/matched -- update data and local storage
+                updateCardData(mutation.target);
+            }
+        }
+    });
+
+    observer.observe(memoryGame, { attributes: true, subtree: true });
+
+
+    // Event listener
+    document.documentElement.addEventListener('click', function (event) {
+
+        // New game button click
+        if (event.target.matches('.new-game')) {
+            event.preventDefault()
+
+            newGame();
+        }
+
+
+        // Card click
+        if (event.target.matches('.card')) {
+            event.preventDefault()
+
+            cardClick(event.target);
+        }
+    }, false);
+
+
+    // Initialize page
+
+    // Start a new game or from previous session 
+    (function () {
+
+        const storedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+        initData(storedData);
+
+        if (storedData) {
+
+            initCardsFromData();
+
+        } else {
+
+            initCardShuffle();
+        }
+    }());
+
+}());

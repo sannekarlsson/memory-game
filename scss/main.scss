@@ -31,6 +31,15 @@ button {
     padding: 0;
 }
 
+svg {
+    user-select: none; 
+}
+
+span, 
+svg {
+    pointer-events: none;
+}
+
 main {
     display: grid;
     grid-gap: 2rem;
@@ -47,6 +56,7 @@ main {
     cursor: pointer;
     perspective: 1000px;
     transform-style: preserve-3d;
+    transform: rotateY(0deg);
     transition: transform 0.7s;
 }
 
@@ -141,45 +151,45 @@ main {
     background: var(--secondary-color);
 }
 
-.selected {
+.hidden-svgs {
+    display: none;
+}
+
+
+.js-flip,
+.js-match {
     cursor: initial;
     transform: rotateY(180deg);
 }
 
+.js-game-complete {
+    overflow: hidden;
+}
+
+.js-game-complete > .game-completed {
+    opacity: 1; 
+    visibility: visible;
+}
+
 /* ***************************** */
-/*     Classes for card faces    */
+/*     Colors for card faces    */
 /* ***************************** */
-.dice {
-    background: lavender;
-}
+$symbols: (
+    "dice": lavender, "droplet": lemonchiffon, 
+    "earth": lightblue, "headphones": lightcoral, 
+    "library": lightgray, "rocket": lightgreen, 
+    "star": lightpink, "trophy": lightseagreen
+    );
 
-.droplet {
-    background: lemonchiffon;
+@each $name, $color in $symbols {
+    [data-symbol=#{$name}] > .card-face {
+    background: $color;
+  }
 }
-
-.earth {
-    background: lightblue;
-}
-
-.headphones {
-    background: lightcoral;
-}
-
-.library {
-    background: lightgray;
-}
-
-.rocket {
-    background: lightgreen;
-}
-
-.star {
-    background: lightpink;
-}
-
-.trophy {
-    background: lightseagreen;
-}
+// Example:
+// [data-symbol=dice] > .card-face {
+//   background: lavender;
+// }
 
 /* ***************************** */
 /*         Media queries         */
