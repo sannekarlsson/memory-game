@@ -25,7 +25,7 @@
 
 
     // Initialize data from a previous session or with initial game values
-    const initData = function (state) {
+    function initData(state) {
         Object.assign(
             data,
             state || {
@@ -37,7 +37,7 @@
     };
 
     // Initialize game from a previous session
-    const initCardsFromData = function () {
+    function initCardsFromData() {
         for (const cardKey in data.cards) {
 
             const cardElem = memoryGrid.querySelector('[data-card-id=' + cardKey + ']');
@@ -55,7 +55,7 @@
     };
 
     // Initialize a new game
-    const initCardShuffle = function () {
+    function initCardShuffle() {
         // Shuffle cards, then reset their states and move them in the shuffled order. 
         [...memoryGrid.querySelectorAll('.card')]
 
@@ -74,7 +74,7 @@
     // Card manipulation
 
     // Flip over the card face up
-    const flipCard = function (cardElem) {
+    function flipCard(cardElem) {
         // Count flip
         data.flips += 1;
 
@@ -85,7 +85,7 @@
     };
 
     // Card to face down after a mismatch or starting a new game.
-    const deselectCard = function (cardElem) {
+    function deselectCard(cardElem) {
         cardElem.classList.remove(FLIP);
 
         // Update aria label to face down
@@ -93,19 +93,19 @@
     };
 
     // Matched a pair of cards
-    const matchedCard = function (cardElem) {
+    function matchedCard(cardElem) {
         cardElem.classList.remove(FLIP);
         cardElem.classList.add(MATCH);
     };
 
     // Reset card to initial game state (face down)
-    const resetCard = function (cardElem) {
+    function resetCard(cardElem) {
         deselectCard(cardElem);
         cardElem.classList.remove(MATCH);
     };
 
     // Update cards data status and save session 
-    const updateCardData = function (cardElem) {
+    function updateCardData(cardElem) {
         data.cards[cardElem.dataset.cardId] = cardElem.className;
         storeState();
     };
@@ -114,14 +114,14 @@
     // Card matching
 
     // Update the paired matching cards
-    const matchingCards = function (cardElems) {
+    function matchingCards(cardElems) {
         cardElems.forEach(function (cardElem) {
             matchedCard(cardElem);
         });
     };
 
     // Deselect the two nonmatching cards
-    const nonmatchingCards = function (cardElems) {
+    function nonmatchingCards(cardElems) {
         // Some delay for ux
         setTimeout(function () {
             cardElems.forEach(function (cardElem) {
@@ -132,12 +132,12 @@
     };
 
     // Check if game is completed
-    const isLastMatchingPair = function () {
+    function isLastMatchingPair() {
         return memoryGrid.querySelectorAll('.' + MATCH).length === 16;
     };
 
     // Match the two flipped over cards
-    const matchCards = function (cardElems) {
+    function matchCards(cardElems) {
 
         if (cardElems[0].dataset.symbol === cardElems[1].dataset.symbol) {
             // Cards match 
@@ -159,7 +159,7 @@
     // Game completed 
 
     // Show game completed message
-    const displayGameCompleted = function () {
+    function displayGameCompleted() {
         memoryGame.classList.add(GAME_COMPLETE);
 
         result.textContent = `${data.flips} card flips`;
@@ -168,14 +168,14 @@
     };
 
     // Hide game completed message
-    const hideGameCompleted = function () {
+    function hideGameCompleted() {
         memoryGrid.classList.remove('blur');
 
         memoryGame.classList.remove(GAME_COMPLETE);
     };
 
     // Handle game completed message
-    const displayCongrats = function () {
+    function displayCongrats() {
 
         // Delay to see all cards flipped before congrats.
         displayTimeout = setTimeout(function () {
@@ -191,7 +191,7 @@
     // Event handlers
 
     // Set up a new game
-    const newGame = function () {
+    function newGame() {
         // If congrats message have not been cleared
         clearTimeout(displayTimeout);
         hideGameCompleted();
@@ -204,7 +204,7 @@
     };
 
     // Handle card click
-    const cardClick = function (cardElem) {
+    function cardClick(cardElem) {
 
         // Card is already flipped -- exit
         if (cardElem.classList.contains(FLIP) || cardElem.classList.contains(MATCH)) {
@@ -233,7 +233,7 @@
 
     // Store the current state, 
     // so the game can be continued in a new session
-    const storeState = function () {
+    function storeState() {
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     };

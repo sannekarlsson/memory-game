@@ -26,7 +26,6 @@ body {
 button {
     appearance: none;
     border: none;
-    cursor: pointer;
     margin: 0;
     padding: 0;
 }
@@ -53,7 +52,6 @@ main {
 
 .card {
     background: transparent;
-    cursor: pointer;
     perspective: 1000px;
     transform-style: preserve-3d;
     transform: rotateY(0deg);
@@ -147,7 +145,7 @@ main {
     user-select: none;
 }
 
-.new-game.touch {
+.new-game:active {
     background: var(--secondary-color);
 }
 
@@ -194,12 +192,6 @@ $symbols: (
 /* ***************************** */
 /*         Media queries         */
 /* ***************************** */
-@media (hover) {
-    .new-game:hover {
-        background: var(--secondary-color);
-    }
-}
-
 @media screen and (min-width: 520px) {
     .memory-grid {
         grid-template-columns: repeat(4, 100px);
