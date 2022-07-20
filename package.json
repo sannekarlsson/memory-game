@@ -38,7 +38,7 @@
     "postcss-cli": "^9.0.1",
     "posthtml-cli": "^0.10.0",
     "sass": "^1.42.1",
-    "terser": "^5.9.0"
+    "terser": "^5.14.2"
   },
   "browserslist": [
     "> 0.25%",
